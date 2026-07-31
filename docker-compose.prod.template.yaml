@@ -1,0 +1,101 @@
+services:
+  {{APP-NAME}}-backend:
+
+    container_name: {{APP-NAME}}-backend
+
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+
+    env_file:
+      - ./backend/env/.env
+      - ./backend/env/${ENV_FILE:-.env.production}
+
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=256
+      UV_THREADPOOL_SIZE: "2"
+
+    expose:
+      - "3000"
+
+    volumes:
+      - ./database:/app/database
+
+    networks:
+      - {{APP-NAME}}-internal
+      - web
+
+    restart: always
+
+    mem_limit: 400m
+    cpus: "0.5"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      - "traefik.http.routers.{{APP-NAME}}-api.rule=Host(`api.{{APP-NAME}}.com`) || Host(`www.api.{{APP-NAME}}.com`)"
+      - "traefik.http.routers.{{APP-NAME}}-api.entrypoints=websecure"
+      - "traefik.http.routers.{{APP-NAME}}-api.tls=true"
+      - "traefik.http.routers.{{APP-NAME}}-api.tls.certresolver=${TRAEFIK_CERTRESOLVER}"
+
+      - "traefik.http.services.{{APP-NAME}}-api.loadbalancer.server.port=3000"
+
+      - "traefik.http.middlewares.compress.compress=true"
+      - "traefik.http.routers.{{APP-NAME}}-api.middlewares=compress"
+
+
+  {{APP-NAME}}-frontend:
+
+    container_name: {{APP-NAME}}-frontend
+
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_BACK_END: ${NEXT_PUBLIC_BACK_END}
+
+    env_file:
+      - ./frontend/env/.env
+      - ./frontend/env/${ENV_FILE:-.env.production}
+
+    environment:
+      - NODE_ENV=production
+
+    expose:
+      - "5556"
+
+    networks:
+      - {{APP-NAME}}-internal
+      - web
+
+    depends_on:
+      - {{APP-NAME}}-backend
+
+    restart: always
+
+    mem_limit: 300m
+    cpus: "0.3"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      - "traefik.http.routers.{{APP-NAME}}-web.rule=Host(`{{APP-NAME}}.com`) || Host(`www.{{APP-NAME}}.com`)"
+      - "traefik.http.routers.{{APP-NAME}}-web.entrypoints=websecure"
+      - "traefik.http.routers.{{APP-NAME}}-web.tls=true"
+      - "traefik.http.routers.{{APP-NAME}}-web.tls.certresolver=${TRAEFIK_CERTRESOLVER}"
+
+      - "traefik.http.services.{{APP-NAME}}-web.loadbalancer.server.port=5556"
+
+      - "traefik.http.middlewares.compress.compress=true"
+      - "traefik.http.routers.{{APP-NAME}}-web.middlewares=compress"
+
+
+networks:
+  {{APP-NAME}}-internal:
+    driver: bridge
+
+  web:
+    external: true

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="concours-belote.com">
+<rect width="256" height="256" rx="28" fill="#FAF5EF"/>
+<circle cx="96" cy="112" r="60" fill="#0EA5A4"/>
+<rect x="66" y="74" width="60" height="80" rx="8" fill="#fff" stroke="#8B5E3C" stroke-width="4" transform="rotate(-10 96 114)"/>
+<rect x="88" y="84" width="60" height="80" rx="8" fill="#fff" stroke="#0EA5A4" stroke-width="4" transform="rotate(10 118 124)"/>
+<text x="140" y="208" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#8B5E3C">concours-belote.com</text>
+</svg>

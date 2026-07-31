@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1280">
+ <defs><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#df98ad"/><stop offset=".48" stop-color="#aeb99a"/><stop offset="1" stop-color="#4d2632"/></linearGradient><filter id="b"><feGaussianBlur stdDeviation="35"/></filter></defs>
+ <rect width="1920" height="1280" fill="url(#s)"/><circle cx="1500" cy="210" r="150" fill="#fff5dc" opacity=".55" filter="url(#b)"/>
+ <path d="M0 820Q370 690 700 800T1400 750T1920 690V1280H0Z" fill="#52664c" opacity=".72"/>
+ <path d="M430 890V480L790 260l360 220v410zm760 0V570l250-155 260 155v320z" fill="#f7eee1" opacity=".84"/>
+ <path d="M385 490 790 225l405 265H1070L790 310 510 490zM1160 575l280-190 290 190h-75l-215-125-210 125z" fill="#4d2731"/>
+ <g fill="#74263c" opacity=".8"><rect x="555" y="555" width="90" height="155"/><rect x="745" y="555" width="90" height="155"/><rect x="930" y="555" width="90" height="155"/><rect x="1260" y="640" width="85" height="125"/><rect x="1460" y="640" width="85" height="125"/></g>
+ <g fill="#f29cba"><circle cx="300" cy="930" r="55"/><circle cx="360" cy="970" r="65"/><circle cx="285" cy="1000" r="45"/><circle cx="1660" cy="950" r="60"/><circle cx="1730" cy="990" r="50"/></g>
+ <text x="960" y="1165" text-anchor="middle" font-family="sans-serif" font-size="28" letter-spacing="8" fill="white" opacity=".7">VISUEL PROVISOIRE · 2400 × 1600 PX RECOMMANDÉ</text>
+</svg>

@@ -1,0 +1,62 @@
+# ============================================
+# BUILD
+# ============================================
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+RUN npm install -g npm@11.6.2
+
+COPY package*.json ./
+COPY prisma ./prisma/
+
+RUN npm ci
+
+COPY . .
+
+RUN DATABASE_URL="file:/tmp/dev.db" npx prisma generate
+RUN npm run build
+
+# ============================================
+# PRODUCTION DEPENDENCIES
+# ============================================
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+RUN npm install -g npm@11.6.2
+
+COPY package*.json ./
+COPY prisma ./prisma/
+
+RUN npm ci --omit=dev
+
+RUN DATABASE_URL="file:/tmp/dev.db" npx prisma generate
+
+# ============================================
+# PRODUCTION
+# ============================================
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
+
+COPY --from=builder /app/dist ./dist
+COPY --from=deps /app/node_modules ./node_modules
+
+COPY package*.json ./
+COPY prisma ./prisma
+
+RUN mkdir -p /app/database && chown -R nestjs:nodejs /app/database
+
+USER nestjs
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
+CMD ["node", "-e", "require('http').get('http://127.0.0.1:3000/health',  r => { r.resume(); process.exit(r.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1))"]
+
+CMD ["node", "dist/main.js"]

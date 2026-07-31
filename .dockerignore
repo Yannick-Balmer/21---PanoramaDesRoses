@@ -1,0 +1,12 @@
+# Dépendances
+node_modules
+
+# Tests
+/test/
+/test-bruno/
+
+# Environnement
+.env
+
+# Git
+.git

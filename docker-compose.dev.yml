@@ -1,0 +1,79 @@
+services:
+  panorama-des-roses-backend:
+
+    container_name: panorama-des-roses-backend
+
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile.dev
+
+    env_file:
+      - ./backend/env/.env
+      - ./backend/env/${ENV_FILE:-.env.development}
+
+    environment:
+      NODE_OPTIONS: --max-old-space-size=512
+      UV_THREADPOOL_SIZE: "2"
+      CHOKIDAR_USEPOLLING: "true"
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ./database:/app/database
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+
+    networks:
+      - panorama-des-roses-internal
+
+
+    restart: "no"
+
+    mem_limit: 800m
+    cpus: "0.5"
+
+
+  panorama-des-roses-frontend:
+
+    container_name: panorama-des-roses-frontend
+
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile.dev
+
+
+    env_file:
+      - ./frontend/env/.env
+      - ./frontend/env/${ENV_FILE:-.env.development}
+
+    environment:
+      WATCHPACK_POLLING: true
+
+    ports:
+      - "5556:5556"
+
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
+    networks:
+      - panorama-des-roses-internal
+
+    depends_on:
+      - panorama-des-roses-backend
+
+    restart: always
+
+    mem_limit: 300m
+    cpus: "0.3"
+
+
+networks:
+  panorama-des-roses-internal:
+    driver: bridge
+
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:

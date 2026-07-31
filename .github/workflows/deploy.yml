@@ -1,0 +1,135 @@
+name: Deploy concours-belote
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==========================================
+      # SOURCE
+      # ==========================================
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Deploying version $VERSION"
+
+      # ==========================================
+      # DOCKER
+      # ==========================================
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ==========================================
+      # BACKEND
+      # ==========================================
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./docker/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/yannick-balmer/concours-belote-backend:${{ steps.version.outputs.version }}
+            ghcr.io/yannick-balmer/concours-belote-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ==========================================
+      # FRONTEND
+      # ==========================================
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./docker/frontend/Dockerfile
+          push: true
+
+          build-args: |
+            NEXT_PUBLIC_BACK_END=${{ secrets.NEXT_PUBLIC_BACK_END }}
+            NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+
+          tags: |
+            ghcr.io/TON_COMPTE/concours-belote-frontend:${{ steps.version.outputs.version }}
+            ghcr.io/TON_COMPTE/concours-belote-frontend:latest
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ==========================================
+      # SSH CONFIG
+      # ==========================================
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          ssh-keyscan -H "${{ secrets.PROD_HOST }}" >> ~/.ssh/known_hosts
+
+      # ==========================================
+      # DEPLOY
+      # ==========================================
+
+      - name: Deploy production
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+        run: |
+          ssh "$PROD_USER@$PROD_HOST" "
+            set -e
+
+            cd /home/yannick/projets/concours-belote
+
+            echo 'Deploying version $VERSION'
+
+            sed -i "s/^VERSION=.*/VERSION=${VERSION}/" .env
+
+            docker compose \
+              --env-file .env \
+              -f docker-compose.prod.yml \
+              pull
+
+            docker compose \
+              --env-file .env \
+              -f docker-compose.prod.yml \
+              up -d \
+              --remove-orphans
+
+            docker image prune -f
+
+            docker compose \
+              --env-file .env \
+              -f docker-compose.prod.yml \
+              ps
+          "

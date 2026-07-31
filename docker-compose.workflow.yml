@@ -1,0 +1,102 @@
+services:
+  panorama-des-roses-backend:
+
+    container_name: panorama-des-roses-backend
+    
+    image: ghcr.io/yannick-balmer/panorama-des-roses-backend:${VERSION}
+   
+    env_file:
+      - ./backend/env/.env
+      - ./backend/env/${ENV_FILE:-.env.production}
+    
+    environment:
+      NODE_OPTIONS: --max-old-space-size=384
+      UV_THREADPOOL_SIZE: "2"   
+   
+   
+   
+    expose:
+      - "3000"
+
+    volumes:
+      - ./database:/app/database
+    
+  
+    networks:
+      - panorama-des-roses-internal
+      - web
+
+    restart: "no"
+
+    mem_limit: 400m
+    cpus: "0.5"
+    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      - "traefik.http.routers.panorama-des-roses-api.rule=Host(`api.panorama-des-roses.com`) || Host(`www.api.panorama-des-roses.com`)"
+      - "traefik.http.routers.panorama-des-roses-api.entrypoints=websecure"
+      - "traefik.http.routers.panorama-des-roses-api.tls=true"
+      - "traefik.http.routers.panorama-des-roses-api.tls.certresolver=${TRAEFIK_CERTRESOLVER}"
+
+      - "traefik.http.services.panorama-des-roses-api.loadbalancer.server.port=3000"
+
+      - "traefik.http.middlewares.compress.compress=true"
+      - "traefik.http.routers.panorama-des-roses-api.middlewares=compress"
+
+
+  panorama-des-roses-frontend:
+
+    container_name: panorama-des-roses-frontend
+
+    image: ghcr.io/yannick-balmer/panorama-des-roses-frontend:${VERSION}
+      
+    environment:
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
+    
+    env_file:
+      - ./frontend/env/.env
+      - ./frontend/env/${ENV_FILE:-.env.production}
+    
+
+    expose:
+    - "5556"
+
+    
+    
+    
+    
+    
+    networks:
+      - panorama-des-roses-internal
+      - web
+
+    depends_on:
+      - panorama-des-roses-backend
+    
+    restart: always
+
+    mem_limit: 300m
+    cpus: "0.3"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      - "traefik.http.routers.panorama-des-roses-web.rule=Host(`panorama-des-roses.com`) || Host(`www.panorama-des-roses.com`)"
+      - "traefik.http.routers.panorama-des-roses-web.entrypoints=websecure"
+      - "traefik.http.routers.panorama-des-roses-web.tls=true"
+      - "traefik.http.routers.panorama-des-roses-web.tls.certresolver=${TRAEFIK_CERTRESOLVER}"
+
+      - "traefik.http.services.panorama-des-roses-web.loadbalancer.server.port=5556"
+
+      - "traefik.http.middlewares.compress.compress=true"
+      - "traefik.http.routers.panorama-des-roses-web.middlewares=compress"
+
+
+networks:
+  panorama-des-roses-internal:
+    driver: bridge
+  web:
+    external: true

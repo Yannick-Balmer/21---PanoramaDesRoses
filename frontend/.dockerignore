@@ -1,0 +1,18 @@
+# Dépendances
+node_modules
+
+# Build
+.next
+coverage
+
+# Environnement
+**/.env
+**/.env.*
+!**/.env.example
+
+# Git
+.git
+
+# Documentation
+README.md
+*.log
