@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { AdminKeyGuard } from './admin-key.guard';
 import { CreateInquiryDto } from './dto/create-inquiry.dto';
 import { InquiriesService } from './inquiries.service';
 
@@ -8,7 +9,17 @@ export class InquiriesController {
 
   @Post()
   async create(@Body() inquiry: CreateInquiryDto) {
-    await this.inquiriesService.send(inquiry);
-    return { success: true, message: 'Demande envoyée et brochure transmise.' };
+    const result = await this.inquiriesService.create(inquiry);
+    return {
+      success: true,
+      message: 'Demande enregistrée et brochure envoyée.',
+      inquiryId: result.id,
+    };
+  }
+
+  @Get('stats')
+  @UseGuards(AdminKeyGuard)
+  getStats() {
+    return this.inquiriesService.getStats();
   }
 }

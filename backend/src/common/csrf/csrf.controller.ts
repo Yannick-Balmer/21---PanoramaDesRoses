@@ -11,10 +11,7 @@ export class CsrfController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): { csrfToken: string } {
-    const csrfToken = this.csrfService.generateToken(
-      request,
-      response,
-    );
+    const csrfToken = this.csrfService.generateToken(request, response);
 
     return { csrfToken };
   }

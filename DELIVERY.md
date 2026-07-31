@@ -13,17 +13,29 @@
 
 ## Parcours du formulaire
 
-1. Le frontend récupère un jeton CSRF auprès de `GET /csrf/token`.
-2. Il transmet les données validées à `POST /inquiries`.
-3. Le backend envoie simultanément :
+1. Le frontend lit `source` dans l’URL et conserve la provenance pendant la session.
+2. Il récupère un jeton CSRF auprès de `GET /csrf/token`.
+3. Il transmet les données validées et la provenance à `POST /inquiries`.
+4. Le backend enregistre d’abord la demande dans SQLite.
+5. Le backend envoie simultanément :
    - la brochure PDF au prospect ;
    - une notification à l’adresse commerciale.
-4. Un champ invisible bloque les soumissions automatisées simples.
+6. Il enregistre l’état de l’envoi (`sent` ou `failed`).
+7. Un champ invisible bloque les soumissions automatisées simples.
+
+## Provenances et statistiques
+
+Les provenances suivies sont `flyers`, `planmasse`,
+`bachepanoramique1` et `direct`.
+
+Les statistiques sont exposées par `GET /inquiries/stats`, protégé par
+l’en-tête `x-admin-key`.
 
 ## À configurer avant la mise en production
 
 - SMTP : `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`.
 - Expéditeur et destinataire : `MAIL_FROM`, `SALES_EMAIL`.
+- Accès aux statistiques : `ADMIN_API_KEY`.
 - Domaine public : `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_BACK_END`.
 - Coordonnées finales dans `frontend/components/sections/contact.tsx`.
 - Domaines Traefik dans `docker-compose.prod.yml`.

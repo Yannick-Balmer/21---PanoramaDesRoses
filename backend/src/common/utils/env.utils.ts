@@ -15,7 +15,7 @@ const sensitiveWords = [
   'SSE_JWT_SECRET',
   'CSRF_SECRET',
   'STRIPE_SECRET_KEY',
-  'STRIPE_WEBHOOK_SECRET'
+  'STRIPE_WEBHOOK_SECRET',
 ];
 
 function maskValue(key: string, value: unknown): string {
@@ -27,7 +27,17 @@ function maskValue(key: string, value: unknown): string {
     return '********';
   }
 
-  return String(value ?? '');
+  if (
+    value === undefined ||
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return String(value ?? '');
+  }
+
+  return '[valeur complexe]';
 }
 
 export default function logMergedEnv(
@@ -35,10 +45,7 @@ export default function logMergedEnv(
   env: string,
   logger: LoggerService,
 ): void {
-  const files = [
-    'env/.env',
-    `env/.env.${env}`,
-  ];
+  const files = ['env/.env', `env/.env.${env}`];
 
   const keys = new Set<string>();
 
@@ -57,11 +64,9 @@ export default function logMergedEnv(
 
   logger.debug('📦 Configuration finale après fusion :');
 
-  [...keys]
-    .sort()
-    .forEach((key) => {
-      const value = configService.get(key);
+  [...keys].sort().forEach((key) => {
+    const value = configService.get<unknown>(key);
 
-      logger.debug(`${key}=${maskValue(key, value)}`);
-    });
+    logger.debug(`${key}=${maskValue(key, value)}`);
+  });
 }

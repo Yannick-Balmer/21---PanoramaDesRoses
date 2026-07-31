@@ -1,17 +1,14 @@
 import { ConfigService } from '@nestjs/config';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 
-export function getCorsConfig(
-  configService: ConfigService,
-): CorsOptions {
-    const allowedOrigins = configService
-  .getOrThrow<string>('FRONTEND_ORIGIN_CORS')
-  .split(',')
-  .map(origin => origin.trim())
-  .filter(Boolean);
+export function getCorsConfig(configService: ConfigService): CorsOptions {
+  const allowedOrigins = configService
+    .getOrThrow<string>('FRONTEND_ORIGIN_CORS')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   return {
-
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -19,15 +16,8 @@ export function getCorsConfig(
         callback(new Error(`Origin CORS interdite: ${origin}`), false);
       }
     },
-    
-    methods: [
-      'GET',
-      'POST',
-      'PUT',
-      'DELETE',
-      'PATCH',
-      'OPTIONS',
-    ],
+
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 
     allowedHeaders: [
       'Content-Type',
@@ -35,12 +25,10 @@ export function getCorsConfig(
       'Accept',
       'x-csrf-token',
       'X-CSRF-TOKEN',
+      'x-admin-key',
     ],
 
-    exposedHeaders: [
-      'x-csrf-token', 
-      'X-CSRF-TOKEN'
-    ],
+    exposedHeaders: ['x-csrf-token', 'X-CSRF-TOKEN'],
 
     credentials: true,
   };

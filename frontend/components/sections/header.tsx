@@ -42,11 +42,11 @@ export function Header() {
             Recevoir la brochure
           </a>
         </nav>
-       {/*  <button className="rounded-full p-2 lg:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Ouvrir le menu">
+        <button className="rounded-full p-2 lg:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Ouvrir le menu">
           {open ? <X /> : <Menu />}
-        </button> */}
+        </button>
       </div>
-      {/* {open && (
+      {open && (
         <nav className="fixed inset-0 top-20 flex flex-col items-center justify-center gap-8 bg-ivory text-wine lg:hidden" aria-label="Navigation mobile">
           {links.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setOpen(false)} className="font-display text-3xl">
@@ -54,7 +54,7 @@ export function Header() {
             </a>
           ))}
         </nav>
-      )} */}
+      )}
     </header>
   );
 }

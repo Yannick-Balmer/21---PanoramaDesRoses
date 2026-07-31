@@ -1,16 +1,34 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { normalizeInquirySource } from "@/lib/inquiry-source";
 
 type State = "idle" | "loading" | "success" | "error";
 
 export function Contact() {
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState("");
+  const sourceInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const urlSource = normalizeInquirySource(
+      new URLSearchParams(window.location.search).get("source"),
+    );
+    const storedSource = normalizeInquirySource(
+      window.sessionStorage.getItem("inquiry_source"),
+    );
+    const attributedSource =
+      urlSource !== "direct" ? urlSource : storedSource;
+
+    window.sessionStorage.setItem("inquiry_source", attributedSource);
+    if (sourceInput.current) {
+      sourceInput.current.value = attributedSource;
+    }
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,6 +73,7 @@ export function Contact() {
           </address>
         </div>
         <form onSubmit={submit} className="rounded-[2rem] border bg-white p-6 shadow-[0_24px_70px_rgb(66_16_31/10%)] md:p-9">
+          <input ref={sourceInput} type="hidden" name="source" defaultValue="direct" />
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Nom et prénom" name="name" required />
             <Field label="Téléphone" name="phone" type="tel" />

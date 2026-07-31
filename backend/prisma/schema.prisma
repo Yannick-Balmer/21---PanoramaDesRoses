@@ -1,0 +1,32 @@
+// --------------------------------------------
+// schema.prisma — concours-belote.com
+// --------------------------------------------
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Inquiry {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String
+  phone           String?
+  interest        String
+  message         String?
+  source          String   @default("direct")
+  consent         Boolean
+  emailStatus     String   @default("pending")
+  emailError      String?
+  brochureSentAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([source])
+  @@index([createdAt])
+  @@index([email])
+}

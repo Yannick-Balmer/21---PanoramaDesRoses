@@ -4,8 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 export class LoggerService {
   private readonly loggers = new Map<string, Logger>();
 
-  private readonly isDevelopment =
-    process.env.NODE_ENV !== 'production';
+  private readonly isDevelopment = process.env.NODE_ENV !== 'production';
 
   private getLogger(context = 'Application'): Logger {
     const existingLogger = this.loggers.get(context);
@@ -29,11 +28,7 @@ export class LoggerService {
     this.getLogger(context).warn(message);
   }
 
-  error(
-    message: string,
-    trace?: string,
-    context?: string,
-  ): void {
+  error(message: string, trace?: string, context?: string): void {
     this.getLogger(context).error(message, trace);
   }
 

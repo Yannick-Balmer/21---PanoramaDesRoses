@@ -1,10 +1,9 @@
-import { PrismaClient, Role, PaymentStatus } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
- 
+  // Aucun jeu de données initial n'est nécessaire.
 }
 
 main()
