@@ -32,6 +32,7 @@ export function Contact() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setState("loading");
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries(form.entries());
@@ -51,7 +52,7 @@ export function Contact() {
       if (!response.ok) throw new Error(data.message?.[0] ?? data.message ?? "Une erreur est survenue.");
       setState("success");
       setMessage("Votre demande a bien été envoyée. La brochure arrive dans votre boîte mail.");
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setState("error");
       setMessage(error instanceof Error ? error.message : "Impossible d’envoyer la demande.");
