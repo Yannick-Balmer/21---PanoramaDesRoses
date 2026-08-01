@@ -6,7 +6,11 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN npm install -g npm@11.6.2
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --global npm@11.6.2 \
+        --no-audit \
+        --no-fund \
+    && npm --version
 
 ENV NPM_CONFIG_FETCH_RETRIES=5 \
     NPM_CONFIG_FETCH_RETRY_MINTIMEOUT=20000 \

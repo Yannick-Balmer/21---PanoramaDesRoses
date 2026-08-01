@@ -7,7 +7,11 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN npm install -g npm@11.6.2
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --global npm@11.6.2 \
+        --no-audit \
+        --no-fund \
+    && npm --version
 
 ARG NEXT_PUBLIC_BACK_END
 ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
