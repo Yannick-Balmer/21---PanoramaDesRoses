@@ -12,7 +12,7 @@ services:
       - ./backend/env/${ENV_FILE:-.env.production}
     
     environment:
-      NODE_OPTIONS: --max-old-space-size=384
+      NODE_OPTIONS: --max-old-space-size=512
       UV_THREADPOOL_SIZE: "2"   
    
    
@@ -30,8 +30,8 @@ services:
 
     restart: "no"
 
-    mem_limit: 400m
-    cpus: "0.5"
+    mem_limit: 600m
+    cpus: "1"
     
     labels:
       - "traefik.enable=true"
